@@ -43,7 +43,6 @@ def report_popularity():
         for p in packages:
             stats_pipe.incr(p, 1)
         stats_pipe.send()
-    print(packages)
 
 
 atexit.register(report_popularity)
