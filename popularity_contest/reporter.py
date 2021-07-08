@@ -27,7 +27,7 @@ def report_popularity():
     statsd = StatsClient(
         host=os.environ.get('PYTHON_POPCONTEST_STATSD_HOST', 'localhost'),
         port=int(os.environ.get('PYTHON_POPCONTEST_STATSD_PORT', 8125)),
-        prefix=os.environ.get('PYTHON_POPCONTEST_STATSD_PREFIX', 'python_popcon.package')
+        prefix=os.environ.get('PYTHON_POPCONTEST_STATSD_PREFIX', 'python_popcon.imported_package')
     )
 
     packages = set()
