@@ -123,6 +123,11 @@ conda environment installed in `/opt/conda`, you can put the file in
 way, it also gets loaded before any user specific IPython startup
 scripts.
 
+Only packages imported *after* `popularity_contest.reporter`
+was imported will be counted. This reduces noise from baseline
+packages (like `IPython` or `six`) that are used invisibly by
+everyone.
+
 ### Statsd server connection info
 
 `popularity_contest` expects the following environment variables

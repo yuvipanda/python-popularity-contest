@@ -9,7 +9,18 @@ On import, this module will setup an `atexit` hook, which will
 send the list of imported modules to a statsd server for aggregation.
 
 """
+import sys
 import atexit
+import os
+from stdlib_list import stdlib_list
+from statsd import StatsClient
+
+# Make a copy of packages that have already been loaded
+# until this point. These will not be reported to statsd,
+# since these are 'infrastructure' packages that are needed
+# by everyone, regardless of the specifics of the code being
+# written.
+ORIGINALLY_LOADED_PACKAGES = list(sys.modules.keys())
 
 def report_popularity():
     """
@@ -17,13 +28,6 @@ def report_popularity():
 
     This runs just before a process exits, so must be very fast.
     """
-    # This function is only run on process exit, so imports here
-    # will not slow down application load time
-    import sys
-    import os
-    from stdlib_list import stdlib_list
-    from statsd import StatsClient
-
     statsd = StatsClient(
         host=os.environ.get('PYTHON_POPCONTEST_STATSD_HOST', 'localhost'),
         port=int(os.environ.get('PYTHON_POPCONTEST_STATSD_PORT', 8125)),
@@ -32,11 +36,16 @@ def report_popularity():
 
     packages = set()
     for name in sys.modules:
-        if not (name in stdlib_list() or name[0] == '_'):
-            # Ignore packages in stdlib or those beginning with _
-            # Only send out the first namespace (everything before first .)
-            # This granularity of information is usually way more than good enough
-            packages.add(name.split('.')[0])
+        if name in ORIGINALLY_LOADED_PACKAGES:
+            # Ignore packages that were already loaded when we were imported
+            continue
+        if name in stdlib_list():
+            # Ignore packages in stdlib
+            continue
+        if name[0] == '_':
+            # Ignore packages starting with `_`
+            continue
+        packages.add(name.split('.')[0])
 
     # Use a statsd pipeline to reduce total network usage
     with statsd.pipeline() as stats_pipe:
