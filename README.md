@@ -155,7 +155,7 @@ to be set.
          import os
          pod_namespace = os.environ['POD_NAMESPACE']
          c.KubeSpawner.environment.update({
-            'PYTHON_POPCONTEST_STATSD_PREFIX': f'python_popcon.hub.{pod_namespace}.imported_package'
+            'PYTHON_POPCONTEST_STATSD_PREFIX': f'python_popcon.namespace.{pod_namespace}.imported_package'
          })
    ```
 
@@ -163,7 +163,7 @@ to be set.
 
    ```yaml
       mappings:
-      - match: "python_popcon.hub.*.imported_package.*"
+      - match: "python_popcon.namespace.*.imported_package.*"
         name: "python_popcon_imported_package"
         labels:
           namespace: "$1"
