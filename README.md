@@ -89,6 +89,85 @@ statsd:
             package: "$1"
 ```
 
+## Installing
+
+`popularity-contest` is available from PyPI, and can be installed
+with `pip`.
+
+```bash
+python3 -m pip install popularity-contest
+```
+
+It must be installed in the environment we want instrumented.
+
+## Usage
+
+### Activation
+
+Once installed, the `popularity_contest.reporter` module needs to
+be imported for reporting to be enabled. You can enable reporting
+for all IPython sessions (and hence Jupyter Notebook sessions)
+with an [IPython startup script](https://switowski.com/blog/ipython-startup-files).
+
+The startup script just needs one line:
+
+```python
+import popularity_contest.reporter
+```
+
+Since the instrumentation is usually set up by an admin and not
+the user, the preferred path for the script is inside `sys.prefix` - the
+location of your virtual environment. For example, if you have a
+conda environment installed in `/opt/conda`, you can put the file in
+`/opt/conda/etc/ipython/startup/000-popularity-contest.py`. This
+way, it also gets loaded before any user specific IPython startup
+scripts.
+
+### Statsd server connection info
+
+`popularity_contest` expects the following environment variables
+to be set.
+
+1. `PYTHON_POPCONTEST_STATSD_HOST` - the hostname or IP address of
+   the server statsd packets will be sent to.
+2. `PYTHON_POPCONTEST_STATSD_PORT` - the port to send statsd packets
+   to. With the recommended `prometheus_statsd` setup, this will be
+   `9125`.
+3. `PYTHON_POPCONTEST_STATSD_PREFIX` - the prefix each statsd metric
+   will have, defaults to `python_popcon.imported_package`. So
+   each metric in statsd will be of the form
+   `python_popcon.imported_package.<package-name>`.
+
+   You can put additional information in this prefix, and use that
+   to extract more labels in prometheus. For example, in a
+   [zero-to-jupyterhub on k8s](https://z2jh.jupyter.org) setup,
+   you can add information about the current hub namespace like this:
+
+   ```yaml
+   hub:
+     extraConfig:
+       07-popularity-contest: |
+         import os
+         pod_namespace = os.environ['POD_NAMESPACE']
+         c.KubeSpawner.environment.update({
+            'PYTHON_POPCONTEST_STATSD_PREFIX': f'python_popcon.hub.{pod_namespace}.imported_package'
+         })
+   ```
+
+   A mapping rule can be added to `prometheus_statsd` to extract the namespace.
+
+   ```yaml
+      mappings:
+      - match: "python_popcon.hub.*.imported_package.*"
+        name: "python_popcon_imported_package"
+        labels:
+          namespace: "$1"
+          package: "$2"
+   ```
+
+   The prometheus metrics produced out of this will be of the form
+   `python_popcon_imported_package{package="<package-name>", namespace="<namespace>}`
+
 ## Privacy
 
 Collecting limited, pre-aggregated data helps preserve privacy as much as
