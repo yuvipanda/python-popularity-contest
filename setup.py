@@ -7,7 +7,7 @@ setuptools.setup(
     author="Yuvi Panda",
     packages=setuptools.find_packages(),
     install_requires=[
-        'stdlib-list',
-        'statsd'
+        'statsd',
+        'importlib_metadata'
     ]
 )
