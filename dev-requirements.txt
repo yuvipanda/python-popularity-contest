@@ -3,7 +3,7 @@ pytest-cov
 coverage
 pytest-mock
 pytest-mypy
-pytest-flake8
+flake8
 
 # Imported in tests to validate our reporting
 escapism
