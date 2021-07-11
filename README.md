@@ -4,10 +4,6 @@
 [![PyPI version](https://badge.fury.io/py/popularity-contest.svg)](https://badge.fury.io/py/popularity-contest)
 ![GitHub Actions](https://github.com/yuvipanda/python-popularity-contest/actions/workflows/lint-and-test.yaml/badge.svg)
 
-In interactive computing installations, figuring out which python
-libraries are in use is extremely helpful in managing environments
-for users.
-
 python-popularity-contest collects pre-aggregated, anonymized data
 on which installed libraries are being actively used by your users.
 
