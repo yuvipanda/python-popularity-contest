@@ -90,6 +90,10 @@ statsd:
             library: "$1"
 ```
 
+The prometheus-statsd chart has [a bug](https://github.com/prometheus-community/helm-charts/issues/1153)
+where `mappingConfig` does not take effect until you restart the prometheus-statsd
+pod.
+
 ## Installing
 
 `popularity-contest` is available from PyPI, and can be installed
