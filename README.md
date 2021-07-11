@@ -1,5 +1,9 @@
 # python-popularity-contest
 
+[![codecov](https://codecov.io/gh/yuvipanda/python-popcontest/branch/main/graph/badge.svg?token=QD438CBG0S)](https://codecov.io/gh/yuvipanda/python-popcontest)
+[![PyPI version](https://badge.fury.io/py/popularity-contest.svg)](https://badge.fury.io/py/popularity-contest)
+![GitHub Actions](https://github.com/yuvipanda/python-popcontest/actions/workflows/lint-and-test.yaml/badge.svg)
+
 In interactive computing installations, figuring out which python
 libraries are in use is extremely helpful in managing environments
 for users.
