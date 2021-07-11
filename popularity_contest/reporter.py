@@ -5,7 +5,7 @@ In interactive computing installations, figuring out which python
 modules are in use is extremely helpful in managing environments
 for users.
 
-On import, this module will setup an `atexit` hook, which will
+`setup_reporter` will setup an `atexit` hook, which will
 send the list of distributions (libraries) from which packages
 have been imported. stdlib and local modules are ignord.
 """
