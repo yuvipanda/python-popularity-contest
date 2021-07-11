@@ -65,8 +65,10 @@ def test_all_packages(mocker):
     """
     expected_packages = set(['escapism', 'statsd', 'statsd.client', 'statsd.defaults'])
     mocker.patch(
-        "importlib_metadata.distributions", return_value=DISTRIBUTION_FIXTURE
+        # Mock importlib_metadata.distributions()
+        "popularity_contest.reporter.distributions", return_value=DISTRIBUTION_FIXTURE
     )
+
     from popularity_contest.reporter import get_all_packages
     assert set(get_all_packages()) == expected_packages
 
@@ -76,7 +78,7 @@ def test_setup(mocker):
         'test_module': None
     }
 
-    register_mock = mocker.patch('atexit.register')
+    register_mock = mocker.patch('popularity_contest.reporter.atexit.register')
 
     from popularity_contest import reporter
 
@@ -88,7 +90,8 @@ def test_setup(mocker):
 
 def test_used_libraries(mocker):
     mocker.patch(
-        "importlib_metadata.distributions", return_value=DISTRIBUTION_FIXTURE
+        # Mock importlib_metadata.distributions()
+        "popularity_contest.reporter.distributions", return_value=DISTRIBUTION_FIXTURE
     )
 
     from popularity_contest.reporter import get_used_libraries
