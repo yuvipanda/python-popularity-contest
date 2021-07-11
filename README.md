@@ -7,6 +7,12 @@
 python-popularity-contest collects pre-aggregated, anonymized data
 on which installed libraries are being actively used by your users.
 
+
+<img
+   src="table-screenshot.png" height="480px"
+   alt="Table showing libraries & their import counts"
+/>
+
 Named after the [debian popularity contest](https://popcon.debian.org/)
 
 ## What data is collected?
@@ -66,6 +72,10 @@ The recommended collection pipeline is:
 3. A [prometheus server](https://prometheus.io/) that scrapes the metrics
    from prometheus_statsd and stores it in a queryable form. A tool like
    [grafana](https://grafana.com/) is used to visualize the results.
+   The query `sum(increase(python_popcon_library_used{namespace=~"$hub"}[$__range])) by (library)` will
+   produce a table (screenshot at beginning of the README)
+   with library used and the number of times it was used in
+   the time range selected in Grafana.
 
 ### Kubernetes setup
 
