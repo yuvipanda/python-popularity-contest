@@ -2,3 +2,6 @@ pytest
 pytest-cov
 pytest-mock
 flake8
+
+# Imported in tests to validate our reporting
+escapism
