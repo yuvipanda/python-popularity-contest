@@ -1,6 +1,7 @@
-from unittest.mock import MagicMock
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock
+
 
 def make_distribution(name, files):
     m = MagicMock()

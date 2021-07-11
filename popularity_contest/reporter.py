@@ -9,12 +9,13 @@ On import, this module will setup an `atexit` hook, which will
 send the list of distributions (libraries) from which packages
 have been imported. stdlib and local modules are ignord.
 """
-import sys
 import atexit
 import os
-from typing import Iterable
-from statsd import StatsClient
+import sys
+
 from importlib_metadata import distributions
+from statsd import StatsClient
+
 
 def setup_reporter(current_modules: set=None):
     """
