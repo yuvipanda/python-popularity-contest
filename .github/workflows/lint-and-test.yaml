@@ -29,11 +29,8 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r dev-requirements.txt
         python -m pip install -e .
-    - name: Lint with flake8
-      run: |
-        flake8 . --show-source --statistics
     - name: Test with pytest
       run: |
-        pytest --mypy --cov=popularity_contest tests/
+        pytest --mypy --flake8 --cov=popularity_contest tests/
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
