@@ -10,7 +10,12 @@ name: Upload Python Package
 
 on:
   push:
+    branches:
+      # Don't run on any branches
+      - "!*"
     tags:
+      # Run on all tags
+      - "*"
 
 jobs:
   deploy:
