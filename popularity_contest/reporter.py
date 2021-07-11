@@ -12,32 +12,28 @@ have been imported. stdlib and local modules are ignord.
 import sys
 import atexit
 import os
+from typing import Iterable
 from statsd import StatsClient
 from importlib_metadata import distributions
 
-# Make a copy of packages that have already been loaded
-# until this point. These will not be reported to statsd,
-# since these are 'infrastructure' packages that are needed
-# by everyone, regardless of the specifics of the code being
-# written.
-ORIGINALLY_LOADED_MODULES = []
-
-def setup_reporter(current_modules=None):
+def setup_reporter(current_modules: set=None):
     """
     Initialize the reporter
 
-    Saves the list of currently loaded modules in a global
-    variable, so we can ignore the modules that were imported
-    before this method was called.
+    Saves the list of currently loaded modules, so they can be
+    excluded when reporting
     """
     if current_modules is None:
-        current_modules = sys.modules
-    global ORIGINALLY_LOADED_MODULES
-    ORIGINALLY_LOADED_MODULES = list(current_modules.keys())
+        # Make a copy of packages that have already been loaded
+        # until this point. These will not be reported to statsd,
+        # since these are 'infrastructure' packages that are needed
+        # by everyone, regardless of the specifics of the code being
+        # written.
+        current_modules = set(sys.modules.keys())
 
-    atexit.register(report_popularity)
+    atexit.register(lambda: report_popularity(current_modules))
 
-def get_all_packages():
+def get_all_packages() -> dict:
     """
     List all installed packages with their distributions
 
@@ -65,7 +61,7 @@ def get_all_packages():
     return packages
 
 
-def get_used_libraries(current_modules, initial_modules):
+def get_used_libraries(initial_modules: set, current_modules: set) -> set:
     """
     Return list of libraries with modules that were imported.
 
@@ -78,11 +74,10 @@ def get_used_libraries(current_modules, initial_modules):
 
     libraries = set()
 
-    for module_name in current_modules:
-        if module_name in initial_modules:
-            # Ignore modules that were already loaded when we were imported
-            continue
+    # Ignore modules that were already loaded when we were imported
+    imported_modules = current_modules - initial_modules
 
+    for module_name in imported_modules:
         # Only look for packages from distributions explicitly
         # installed in the environment. No stdlib, no local installs.
         if module_name in all_packages:
@@ -91,7 +86,7 @@ def get_used_libraries(current_modules, initial_modules):
 
     return libraries
 
-def report_popularity(current_modules=None):
+def report_popularity(initial_modules: set, current_modules: set=None):
     """
     Report imported packages to statsd
 
@@ -99,14 +94,14 @@ def report_popularity(current_modules=None):
     possible.
     """
     if current_modules is None:
-        current_modules = sys.modules
+        current_modules = set(sys.modules.keys())
     statsd = StatsClient(
         host=os.environ.get('PYTHON_POPCONTEST_STATSD_HOST', 'localhost'),
         port=int(os.environ.get('PYTHON_POPCONTEST_STATSD_PORT', 8125)),
         prefix=os.environ.get('PYTHON_POPCONTEST_STATSD_PREFIX', 'python_popcon')
     )
 
-    libraries = get_used_libraries(current_modules, ORIGINALLY_LOADED_MODULES)
+    libraries = get_used_libraries(initial_modules, current_modules)
 
     # Use a statsd pipeline to reduce total network usage
     with statsd.pipeline() as stats_pipe:

@@ -34,6 +34,6 @@ jobs:
         flake8 . --show-source --statistics
     - name: Test with pytest
       run: |
-        pytest --cov=popularity_contest tests/
+        pytest --mypy --cov=popularity_contest tests/
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

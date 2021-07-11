@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 from pathlib import Path
+import sys
 
 def make_distribution(name, files):
     m = MagicMock()
@@ -63,7 +64,7 @@ def test_all_packages(mocker):
     """
     Test resources
     """
-    expected_packages = set(['escapism', 'statsd', 'statsd.client', 'statsd.defaults'])
+    expected_packages = {'escapism', 'statsd', 'statsd.client', 'statsd.defaults'}
     mocker.patch(
         # Mock importlib_metadata.distributions()
         "popularity_contest.reporter.distributions", return_value=DISTRIBUTION_FIXTURE
@@ -74,17 +75,11 @@ def test_all_packages(mocker):
 
 
 def test_setup(mocker):
-    existing_modules = {
-        'test_module': None
-    }
-
     register_mock = mocker.patch('popularity_contest.reporter.atexit.register')
 
     from popularity_contest import reporter
 
-    assert reporter.ORIGINALLY_LOADED_MODULES == []
-    reporter.setup_reporter(existing_modules)
-    assert reporter.ORIGINALLY_LOADED_MODULES == ['test_module']
+    reporter.setup_reporter(set())
     register_mock.assert_called_once()
 
 
@@ -96,23 +91,26 @@ def test_used_libraries(mocker):
 
     from popularity_contest.reporter import get_used_libraries
     assert get_used_libraries(
-        # Modules loaded after we called the register function
-        current_modules={'statsd.defaults': None, 'escapism': None},
         # Modules loaded before we called our register function
-        initial_modules={'escapism': None}
+        initial_modules={'escapism'},
+        # Modules loaded after we called the register function
+        current_modules={'statsd.defaults', 'escapism'}
     ) == set(['statsd'])
 
 def test_statsd_emit(mocker):
     statsd_class_mock = mocker.patch('popularity_contest.reporter.StatsClient', autospec=True)
 
-    from popularity_contest.reporter import setup_reporter, report_popularity
+    from popularity_contest.reporter import report_popularity
 
-    setup_reporter()
+    initial_modules = set(sys.modules.keys())
+    # If escapism is somehow already imported, let's get it out
+    if 'escapism' in initial_modules:
+        initial_modules.remove('escapism')
 
     # Import escapism after setting up reporter, so it should be reported
-    import escapism  # noqa
+    import escapism  # type: ignore # noqa
 
-    report_popularity()
+    report_popularity(initial_modules)
 
     statsd_mock = statsd_class_mock.return_value
 

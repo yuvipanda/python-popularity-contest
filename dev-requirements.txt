@@ -2,6 +2,7 @@ pytest
 pytest-cov
 coverage
 pytest-mock
+pytest-mypy
 flake8
 
 # Imported in tests to validate our reporting
