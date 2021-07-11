@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock
+from functools import partial
 
 
 def make_distribution(name, files):
@@ -98,20 +99,27 @@ def test_used_libraries(mocker):
         current_modules={'statsd.defaults', 'escapism'}
     ) == set(['statsd'])
 
+
 def test_statsd_emit(mocker):
     statsd_class_mock = mocker.patch('popularity_contest.reporter.StatsClient', autospec=True)
 
-    from popularity_contest.reporter import report_popularity
+    registered_function = None
+    def register_mock(func, *args, **kwargs):
+        # Save the passed in function + args
+        nonlocal registered_function
+        registered_function = partial(func, *args, **kwargs)
 
-    initial_modules = set(sys.modules.keys())
-    # If escapism is somehow already imported, let's get it out
-    if 'escapism' in initial_modules:
-        initial_modules.remove('escapism')
+    mocker.patch('popularity_contest.reporter.atexit.register', new=register_mock)
+
+    from popularity_contest.reporter import setup_reporter
+
+    setup_reporter()
 
     # Import escapism after setting up reporter, so it should be reported
     import escapism  # type: ignore # noqa
 
-    report_popularity(initial_modules)
+    # Simulate process ending and atexit.register-ed callbacks firing
+    registered_function()
 
     statsd_mock = statsd_class_mock.return_value
 

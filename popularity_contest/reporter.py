@@ -32,7 +32,7 @@ def setup_reporter(current_modules: set=None):
         # written.
         current_modules = set(sys.modules.keys())
 
-    atexit.register(lambda: report_popularity(current_modules))
+    atexit.register(report_popularity, current_modules)
 
 def get_all_packages() -> dict:
     """
