@@ -98,3 +98,24 @@ def test_used_libraries(mocker):
         # Modules loaded before we called our register function
         initial_modules={'escapism': None}
     ) == set(['statsd'])
+
+def test_statsd_emit(mocker):
+    statsd_class_mock = mocker.patch('popularity_contest.reporter.StatsClient', autospec=True)
+
+    from popularity_contest.reporter import setup_reporter, report_popularity
+
+    setup_reporter()
+
+    # Import escapism after setting up reporter, so it should be reported
+    import escapism  # noqa
+
+    report_popularity()
+
+    statsd_mock = statsd_class_mock.return_value
+
+    statsd_mock.pipeline.assert_called_once()
+    statsd_mock.incr.assert_called_once()
+
+    pipeline_mock = statsd_mock.pipeline.return_value.__enter__.return_value
+    pipeline_mock.send.assert_called_once()
+    pipeline_mock.incr.assert_called_once_with("library_used.escapism", 1)
