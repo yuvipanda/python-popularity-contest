@@ -49,17 +49,20 @@ def get_all_packages() -> dict:
     packages = {}
     for dist in distributions():
         try:
-            for f in dist.files:
-                if f.name == '__init__.py':
-                    # If an __init__.py file is present, the parent
-                    # directory should be counted as a package
-                    package = str(f.parent).replace('/',  '.')
-                    packages.setdefault(package, []).append(dist)
-                elif f.name == str(f):
-                    # If it is a top level file, it should be
-                    # considered as a package by itself
-                    package = str(f).replace('.py', '')
-                    packages.setdefault(package, []).append(dist)
+            if dist.files:
+                for f in dist.files:
+                    if f.name == '__init__.py':
+                        # If an __init__.py file is present, the parent
+                        # directory should be counted as a package
+                        package = str(f.parent).replace('/',  '.')
+                        packages.setdefault(package, []).append(dist)
+                    elif f.name == str(f):
+                        # If it is a top level file, it should be
+                        # considered as a package by itself
+                        package = str(f).replace('.py', '')
+                        packages.setdefault(package, []).append(dist)
+            else:
+                sys.stderr.write('Skipping package {0} due to no files being present.\n'.format(dist.name))
         except ValueError:
             sys.stderr.write('python-popularity-contest: Skipping package {0} due to ValueError.\n'.format(dist.name))
     return packages
