@@ -62,7 +62,7 @@ def get_all_packages() -> dict:
                         package = str(f).replace('.py', '')
                         packages.setdefault(package, []).append(dist)
             else:
-                sys.stderr.write('Skipping package {0} due to no files being present.\n'.format(dist.name))
+                sys.stderr.write('python-popularity-contest: Skipping package {0} due to no files being present in dist.\n'.format(dist.name))
         except ValueError:
             sys.stderr.write('python-popularity-contest: Skipping package {0} due to ValueError.\n'.format(dist.name))
     return packages
