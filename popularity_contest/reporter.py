@@ -48,7 +48,6 @@ def get_all_packages() -> dict:
         have a lot of packages installed on a slow filesystem (like NFS).
     """
     packages = {}
-    skipped_packages = []
     for dist in distributions():
         try:
             if dist.files:
