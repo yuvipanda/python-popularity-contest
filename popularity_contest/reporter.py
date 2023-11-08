@@ -12,6 +12,7 @@ have been imported. stdlib and local modules are ignord.
 import atexit
 import os
 import sys
+import traceback
 
 from importlib_metadata import distributions
 from statsd import StatsClient
@@ -47,6 +48,7 @@ def get_all_packages() -> dict:
         have a lot of packages installed on a slow filesystem (like NFS).
     """
     packages = {}
+    skipped_packages = []
     for dist in distributions():
         try:
             if dist.files:
@@ -65,6 +67,7 @@ def get_all_packages() -> dict:
                 sys.stderr.write('python-popularity-contest: Skipping package {0} due to no files being present in dist.\n'.format(dist.name))
         except ValueError:
             sys.stderr.write('python-popularity-contest: Skipping package {0} due to ValueError.\n'.format(dist.name))
+            traceback.print_exception(*sys.exc_info(), file=sys.stderr)
     return packages
 
 
