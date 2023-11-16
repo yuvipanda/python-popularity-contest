@@ -12,6 +12,7 @@ have been imported. stdlib and local modules are ignord.
 import atexit
 import os
 import sys
+import traceback
 
 from importlib_metadata import distributions
 from statsd import StatsClient
@@ -48,17 +49,26 @@ def get_all_packages() -> dict:
     """
     packages = {}
     for dist in distributions():
-        for f in dist.files:
-            if f.name == '__init__.py':
-                # If an __init__.py file is present, the parent
-                # directory should be counted as a package
-                package = str(f.parent).replace('/',  '.')
-                packages.setdefault(package, []).append(dist)
-            elif f.name == str(f):
-                # If it is a top level file, it should be
-                # considered as a package by itself
-                package = str(f).replace('.py', '')
-                packages.setdefault(package, []).append(dist)
+        try:
+            if dist.files:
+                for f in dist.files:
+                    if f.name == '__init__.py':
+                        # If an __init__.py file is present, the parent
+                        # directory should be counted as a package
+                        package = str(f.parent).replace('/',  '.')
+                        packages.setdefault(package, []).append(dist)
+                    elif f.name == str(f):
+                        # If it is a top level file, it should be
+                        # considered as a package by itself
+                        package = str(f).replace('.py', '')
+                        packages.setdefault(package, []).append(dist)
+            else:
+                pass
+                # sys.stderr.write('python-popularity-contest: Skipping package {0} due to no files being present in dist.\n'.format(dist.name))
+        except ValueError:
+            pass
+            # sys.stderr.write('python-popularity-contest: Skipping package {0} due to ValueError.\n'.format(dist.name))
+            # traceback.print_exception(*sys.exc_info(), file=sys.stderr)
     return packages
 
 
